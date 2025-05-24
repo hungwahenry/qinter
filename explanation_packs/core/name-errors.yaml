@@ -1,0 +1,185 @@
+metadata:
+  name: "core-python-name-errors"
+  version: "1.0.0"
+  description: "Core Python NameError explanations with smart suggestions"
+  author: "Qinter Team"
+  license: "MIT"
+  qinter_version: ">=1.0.0"
+  targets:
+    - "NameError"
+  tags: ["core", "python", "variables", "beginner"]
+  homepage: "https://github.com/qinter/core-packs"
+
+explanations:
+  - id: "undefined-variable-with-typo"
+    priority: 20
+    conditions:
+      exception_type: "NameError"
+      message_patterns:
+        - "name '([^']+)' is not defined"
+      context_conditions:
+        - type: "variable_similarity"
+          threshold: 0.6
+          min_matches: 1
+    
+    explanation:
+      title: "Undefined Variable: '{variable_name}' (Possible Typo)"
+      description: |
+        Python can't find a variable named '{variable_name}'. Based on your other variables, 
+        this looks like it might be a typo.
+      
+      suggestions:
+        - condition: "similar_variables_exist"
+          template: "Did you mean '{closest_variable}'? (Similarity: {similarity_score:.0%})"
+          priority: 1
+        
+        - template: "Check the spelling of '{variable_name}'"
+          priority: 2
+        
+        - template: "Make sure you defined the variable before using it"
+          priority: 3
+      
+      examples:
+        - id: "fix-typo"
+          condition: "similar_variables_exist"
+          description: "Fix the typo in the variable name"
+          code: |
+            # You probably meant:
+            print({closest_variable})  # instead of {variable_name}
+        
+        - id: "define-variable"
+          condition: "always"
+          description: "Define the variable before using it"
+          code: |
+            # Define the variable first
+            {variable_name} = "some_value"
+            print({variable_name})
+
+  - id: "undefined-variable-import-like"
+    priority: 15
+    conditions:
+      exception_type: "NameError"
+      message_patterns:
+        - "name '([^']+)' is not defined"
+      context_conditions:
+        - type: "import_pattern"
+          modules: ["requests", "pandas", "numpy", "matplotlib", "json", "os", "sys", "datetime", "math", "random"]
+    
+    explanation:
+      title: "Missing Import: '{variable_name}'"
+      description: |
+        Python can't find '{variable_name}'. This looks like a module or library name 
+        that you forgot to import.
+      
+      suggestions:
+        - condition: "looks_like_import"
+          template: "Import the module: import {variable_name}"
+          priority: 1
+        
+        - condition: "looks_like_import"
+          template: "Or import specific functions: from {variable_name} import function_name"
+          priority: 2
+        
+        - template: "Make sure the package is installed: pip install {variable_name}"
+          priority: 3
+      
+      examples:
+        - id: "import-module"
+          condition: "looks_like_import"
+          description: "Import the module before using it"
+          code: |
+            import {variable_name}
+            
+            # Now you can use it
+            result = {variable_name}.some_function()
+        
+        - id: "install-and-import"
+          condition: "looks_like_import"
+          description: "Install and import the package"
+          code: |
+            # In terminal: pip install {variable_name}
+            
+            # In your code:
+            import {variable_name}
+
+  - id: "undefined-variable-builtin-typo"
+    priority: 25
+    conditions:
+      exception_type: "NameError"
+      message_patterns:
+        - "name '([^']+)' is not defined"
+      context_conditions:
+        - type: "builtin_typo"
+          functions: ["len", "print", "str", "int", "float", "list", "dict", "tuple", "set"]
+          threshold: 0.7
+    
+    explanation:
+      title: "Misspelled Built-in Function: '{variable_name}'"
+      description: |
+        Python can't find '{variable_name}'. This looks like a misspelled built-in function.
+      
+      suggestions:
+        - condition: "builtin_typo_detected"
+          template: "Did you mean '{correct_builtin}'?"
+          priority: 1
+        
+        - template: "Check the spelling of the function name"
+          priority: 2
+      
+      examples:
+        - id: "fix-builtin-typo"
+          condition: "builtin_typo_detected"
+          description: "Use the correct built-in function name"
+          code: |
+            # Wrong:
+            result = {variable_name}(my_list)
+            
+            # Right:
+            result = {correct_builtin}(my_list)
+
+  - id: "undefined-variable-generic"
+    priority: 5
+    conditions:
+      exception_type: "NameError"
+      message_patterns:
+        - "name '([^']+)' is not defined"
+    
+    explanation:
+      title: "Undefined Variable: '{variable_name}'"
+      description: |
+        Python can't find a variable, function, or module named '{variable_name}'. 
+        This usually means you either haven't defined it yet, misspelled the name, 
+        or forgot to import a module.
+      
+      suggestions:
+        - template: "Define the variable before using it: {variable_name} = some_value"
+          priority: 1
+        
+        - template: "Check if you need to import a module"
+          priority: 2
+        
+        - template: "Verify the variable name is spelled correctly"
+          priority: 3
+        
+        - template: "Make sure the variable is in the correct scope"
+          priority: 4
+      
+      examples:
+        - id: "define-variable"
+          condition: "always"
+          description: "Define the variable before using it"
+          code: |
+            # Define the variable first
+            {variable_name} = "some_value"
+            print({variable_name})
+        
+        - id: "check-scope"
+          condition: "always"
+          description: "Check variable scope"
+          code: |
+            def my_function():
+                {variable_name} = "local variable"
+                return {variable_name}
+            
+            # Use the function to access the variable
+            result = my_function()

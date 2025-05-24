@@ -1,0 +1,153 @@
+metadata:
+  name: "core-python-type-errors"
+  version: "1.0.0"
+  description: "Core Python TypeError explanations with type conversion help"
+  author: "Qinter Team"
+  license: "MIT"
+  qinter_version: ">=1.0.0"
+  targets:
+    - "TypeError"
+  tags: ["core", "python", "types", "beginner"]
+
+explanations:
+  - id: "not-callable"
+    priority: 20
+    conditions:
+      exception_type: "TypeError"
+      message_patterns:
+        - "'([^']+)' object is not callable"
+    
+    explanation:
+      title: "Trying to Call a {object_type}"
+      description: |
+        You're trying to call something like a function by adding parentheses (), 
+        but it's actually a {object_type}. This usually happens when you accidentally 
+        add parentheses after a variable name.
+      
+      suggestions:
+        - template: "Remove the parentheses () if you meant to access the {object_type}"
+          priority: 1
+        
+        - template: "Check if you meant to call a method on this object instead"
+          priority: 2
+        
+        - template: "Verify the variable contains what you expect"
+          priority: 3
+        
+        - template: "Make sure you didn't accidentally overwrite a function name"
+          priority: 4
+      
+      examples:
+        - id: "remove-parentheses"
+          condition: "always"
+          description: "Access the value without calling it"
+          code: |
+            # Wrong: trying to call a {object_type}
+            result = my_variable()  # Error!
+            
+            # Right: just access the {object_type}
+            result = my_variable
+        
+        - id: "call-method"
+          condition: "always"
+          description: "Maybe you wanted to call a method"
+          code: |
+            # If it's a string, maybe you meant:
+            result = my_variable.upper()  # Call a method
+            
+            # If it's a list, maybe you meant:
+            result = my_variable.append(item)  # Call a method
+
+  - id: "unsupported-operand"
+    priority: 15
+    conditions:
+      exception_type: "TypeError"
+      message_patterns:
+        - "unsupported operand type\\(s\\) for (.+): '([^']+)' and '([^']+)'"
+    
+    explanation:
+      title: "Can't Perform {operation} Between {type1} and {type2}"
+      description: |
+        You're trying to use the {operation} operator between a {type1} and a {type2}, 
+        but Python doesn't know how to do this operation with these types.
+      
+      suggestions:
+        - template: "Convert both values to the same type before the {operation}"
+          priority: 1
+        
+        - template: "Check if your variables contain the expected data types"
+          priority: 2
+        
+        - template: "Use appropriate type conversion functions (int(), str(), float())"
+          priority: 3
+        
+        - template: "Verify you're using the right operator for what you want to do"
+          priority: 4
+      
+      examples:
+        - id: "convert-types"
+          condition: "always"
+          description: "Convert types to match"
+          code: |
+            # Wrong: mixing types
+            result = '5' {operation} 3  # Error!
+            
+            # Right: convert to same type
+            result = int('5') {operation} 3  # Convert string to int
+            # OR
+            result = '5' {operation} str(3)  # Convert int to string
+
+  - id: "not-subscriptable"
+    priority: 18
+    conditions:
+      exception_type: "TypeError"
+      message_patterns:
+        - "'([^']+)' object is not subscriptable"
+    
+    explanation:
+      title: "Can't Use [] with {object_type}"
+      description: |
+        You're trying to use square brackets [] with a {object_type}, but this type 
+        doesn't support indexing. Only sequences (lists, strings, tuples) and 
+        mappings (dictionaries) can be accessed with [].
+      
+      suggestions:
+        - template: "Check if the variable is actually a list, string, dict, or tuple"
+          priority: 1
+        
+        - template: "If it's a {object_type}, use the appropriate method to access its data"
+          priority: 2
+        
+        - template: "Verify the variable contains what you expect"
+          priority: 3
+        
+        - template: "Print the variable and its type to debug: print(type(my_var))"
+          priority: 4
+      
+      examples:
+        - id: "check-type"
+          condition: "always"
+          description: "Check what type your variable actually is"
+          code: |
+            # Debug what you're working with
+            print(f"Variable: {my_variable}")
+            print(f"Type: {type(my_variable)}")
+            
+            # Then use the appropriate access method
+        
+        - id: "correct-access"
+          condition: "always"
+          description: "Use correct access method for the type"
+          code: |
+            # For lists/tuples: use indexing
+            if isinstance(my_var, (list, tuple)):
+                item = my_var[0]
+            
+            # For dictionaries: use keys
+            elif isinstance(my_var, dict):
+                item = my_var['key']
+            
+            # For other types: use appropriate methods
+            else:
+                # Check the type's documentation
+                print(type(my_var).__doc__)

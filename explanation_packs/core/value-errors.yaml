@@ -1,0 +1,175 @@
+metadata:
+  name: "core-python-value-errors"
+  version: "1.0.0"
+  description: "Core Python ValueError explanations with data validation help"
+  author: "Qinter Team"
+  license: "MIT"
+  qinter_version: ">=1.0.0"
+  targets:
+    - "ValueError"
+  tags: ["core", "python", "values", "conversion", "beginner"]
+
+explanations:
+  - id: "invalid-int-conversion"
+    priority: 20
+    conditions:
+      exception_type: "ValueError"
+      message_patterns:
+        - "invalid literal for int\\(\\) with base \\d+: '([^']*)'"
+    
+    explanation:
+      title: "Can't Convert '{bad_value}' to Integer"
+      description: |
+        You're trying to convert '{bad_value}' to an integer, but it contains 
+        characters that aren't numbers. int() can only convert strings that 
+        contain valid integer numbers.
+      
+      suggestions:
+        - template: "Check if the string contains only digits (and optionally a - sign)"
+          priority: 1
+        
+        - template: "Remove any spaces, letters, or special characters from the string"
+          priority: 2
+        
+        - template: "Use float() first if the string contains a decimal point, then int()"
+          priority: 3
+        
+        - template: "Validate the input before converting to catch bad data early"
+          priority: 4
+      
+      examples:
+        - id: "clean-string"
+          condition: "always"
+          description: "Clean the string before converting"
+          code: |
+            # Wrong:
+            result = int('123abc')  # Error!
+            
+            # Right: extract numbers only
+            text = '123abc'
+            numbers_only = ''.join(filter(str.isdigit, text))
+            result = int(numbers_only)  # 123
+        
+        - id: "handle-decimal"
+          condition: "always"
+          description: "Handle decimal numbers"
+          code: |
+            # Wrong:
+            result = int('12.5')  # Error!
+            
+            # Right: convert via float first
+            result = int(float('12.5'))  # 12
+        
+        - id: "validate-input"
+          condition: "always"
+          description: "Validate before converting"
+          code: |
+            user_input = input('Enter a number: ')
+            
+            if user_input.strip().isdigit():
+                number = int(user_input)
+                print(f"You entered: {number}")
+            else:
+                print("Please enter a valid whole number")
+
+  - id: "unpacking-not-enough"
+    priority: 18
+    conditions:
+      exception_type: "ValueError"
+      message_patterns:
+        - "not enough values to unpack \\(expected (\\d+), got (\\d+)\\)"
+    
+    explanation:
+      title: "Not Enough Values to Unpack (Expected {expected}, Got {actual})"
+      description: |
+        You're trying to unpack a sequence (like a list or tuple) into {expected} variables, 
+        but the sequence only has {actual} items.
+      
+      suggestions:
+        - template: "Check how many items are actually in the sequence"
+          priority: 1
+        
+        - template: "Make sure the sequence has the expected {expected} elements"
+          priority: 2
+        
+        - template: "Use the right number of variables ({actual}) for unpacking"
+          priority: 3
+        
+        - template: "Add default values or use * to capture remaining items"
+          priority: 4
+      
+      examples:
+        - id: "match-variables"
+          condition: "always"
+          description: "Match variables to sequence length"
+          code: |
+            # Wrong: not enough values
+            data = [1, 2]  # Only {actual} items
+            x, y, z = data  # Trying to unpack into {expected} variables
+            
+            # Right: match the number of items
+            x, y = data  # Use {actual} variables
+        
+        - id: "use-star"
+          condition: "always"
+          description: "Use * for flexible unpacking"
+          code: |
+            data = [1, 2]  # Only {actual} items
+            
+            # Option 1: Add defaults
+            x, y, z = data + [None]  # Add default value
+            
+            # Option 2: Use * (Python 3+)
+            x, y, *rest = data  # rest will be empty list
+
+  - id: "unpacking-too-many"
+    priority: 18
+    conditions:
+      exception_type: "ValueError"
+      message_patterns:
+        - "too many values to unpack \\(expected (\\d+)\\)"
+    
+    explanation:
+      title: "Too Many Values to Unpack (Expected {expected})"
+      description: |
+        You're trying to unpack a sequence into {expected} variables, but the sequence 
+        has more items than you have variables.
+      
+      suggestions:
+        - template: "Add more variables to match the sequence length"
+          priority: 1
+        
+        - template: "Use * to capture extra items in a list"
+          priority: 2
+        
+        - template: "Slice the sequence to get only the first {expected} items"
+          priority: 3
+        
+        - template: "Check if the sequence has the expected structure"
+          priority: 4
+      
+      examples:
+        - id: "use-star-capture"
+          condition: "always"
+          description: "Use * to capture extra values"
+          code: |
+            # Wrong: too many values
+            data = [1, 2, 3, 4, 5]  # More than {expected} items
+            x, y = data  # Only {expected} variables
+            
+            # Right: capture extra values
+            x, y, *extras = data
+            # x=1, y=2, extras=[3, 4, 5]
+        
+        - id: "slice-sequence"
+          condition: "always"
+          description: "Take only what you need"
+          code: |
+            data = [1, 2, 3, 4, 5]
+            
+            # Take only first {expected} items
+            x, y = data[:{expected}]
+            
+            # Or be explicit about what you want
+            first_two = data[:2]
+            x, y = first_two
